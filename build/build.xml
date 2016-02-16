@@ -1,0 +1,108 @@
+<!DOCTYPE project>
+
+<project name="ant-grunt-launcher" default="jar" basedir=".." xmlns:ivy="antlib:org.apache.ivy.ant">
+	
+	<path id="ivy.lib.path">
+		<pathelement path="build/lib/ivy.jar" />
+		<pathelement path="build/lib/jsch-0.1.42.jar" />
+		<pathelement path="build/lib/ant-contrib-0.6.jar" />
+	</path> 
+	<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path" />
+
+	<taskdef resource="net/jtools/classloadertask/antlib.xml">
+	    <classpath>
+	      <fileset dir="build/lib" includes="ant-classloader*.jar"/>
+	    </classpath>
+	</taskdef>
+	
+	<!--Add JSCH jar to the classpath-->
+	<classloader loader="system">
+	    <classpath>
+	      <fileset dir="build/lib" includes="*.jar"/>
+	    </classpath>
+	</classloader>
+	
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+	  <classpath>
+	    <pathelement location="build/lib/ant-contrib-0.6.jar"/>
+	  </classpath>
+	</taskdef>
+
+
+		<tstamp>
+			<format property="TODAY" pattern="yyyyMMddHHmmss" />
+		</tstamp>
+	
+		<property name="project.release.version" value="0.0.1" />
+		<property name="project.status" value="release" />
+	
+		
+		<property name="app" value="ant-grunt-launcher" />
+
+		<property name="src.dir" location="src" />
+		<property name="todeploy.dir" location="deploy" />
+		<property name="lib.dir" location="lib" />
+		<property name="classes.dir" location="${todeploy.dir}/classes" />
+		<property name="release.dir" location="release" />
+		<!-- Delete the .class and .war files -->
+		<target name="cleanWorkspace" description="Clean dir deploy">
+			<delete dir="${todeploy.dir}" />
+		</target>
+	
+	
+
+		<path id="compile.path">
+			<fileset dir="${lib.dir}" includes="*.jar" />
+		</path>
+
+		<target name="init">
+			<echo message="${app}" />
+			<mkdir dir="${todeploy.dir}" />
+			<mkdir dir="${classes.dir}" />
+			<mkdir dir="${todeploy.dir}/lib" />
+			<mkdir dir="${release.dir}" />
+			<echo message="Java home: ${java.home}" />
+			<tstamp>
+				<format property="now" pattern="dd/MM/yyyy HH:mm:ss" />
+			</tstamp>
+		</target>
+
+		
+		<target name="compile"  description="Compile classes">
+			<echo message="Classes Compile ${classes.dir} started" />
+			
+			<javac srcdir="${src.dir}" destdir="${classes.dir}" debug="on" deprecation="on" source="1.7" target="1.7" optimize="off" classpathref="compile.path" fork="true" memoryinitialsize="512m" memorymaximumsize="512m"/>
+			
+			<echo message="Classes Compile ${classes.dir} ended" />
+		</target>
+		
+	
+		<target name="jar" description="Create application jar" depends="init, compile">
+			<echo message="Creation of ${app}.jar started" />
+
+			<delete file="${todeploy.dir}/${app}.jar" />
+			<jar destfile="${todeploy.dir}/${app}.jar" >
+				<fileset dir="${classes.dir}">
+					<include name="org/jberta93/**/*.class" />
+				</fileset>
+				<manifest> 
+					<section name="common">
+						<attribute name="Specification-Title" value="${app}"/>
+						<attribute name="Local-Version" value="${project.release.version}" />
+						<attribute name="Implementation-Vendor" value="Lorenzo Bertacchi"/>
+						<attribute name="Artifact-status" value="${project.status}"/>					
+					</section>
+				</manifest>
+			</jar>
+			
+			<echo message="Creation of ${app}.jar ended" />
+		</target>
+		
+		<target name="jar-release" description="Create application jar" depends="cleanWorkspace, init, compile, jar">
+			<copy todir="${release.dir}" overwrite="true">
+			    <fileset dir="${todeploy.dir}"/>
+			    <globmapper from="*.jar" to="${app}-${project.release.version}.jar"/>
+			 </copy>
+			<echo message="File moved in ${release.dir}/${app}-${project.release.version}.jar"/>
+		</target>
+</project>
