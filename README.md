@@ -41,5 +41,5 @@ executebowerinstall | no  | boolean | If you want to execute bower install befor
 This project is released over [MIT license](http://opensource.org/licenses/MIT "MIT License")
 
 # Author
-===============================
+
 [Lorenzo Bertacchi](http://www.lorenzobertacchi.it/?lang=en)
