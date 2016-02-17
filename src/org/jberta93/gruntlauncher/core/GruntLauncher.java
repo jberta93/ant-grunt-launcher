@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Map;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
@@ -37,7 +36,7 @@ public class GruntLauncher extends Task {
 		log("Execute Bower Install: " + (getExecuteBowerInstall() != null && getExecuteBowerInstall()));
 
 		log("-----------------------------");
-		String command = "";
+		String[] command;
 		String cwd = getGruntfileDir();
 
 		File execFile = null;
@@ -51,14 +50,14 @@ public class GruntLauncher extends Task {
 
 		if (execFile != null) {
 			if (OSUtils.getOS().equals(OperatingSystem.WINDOWS)) {
-				command = "run " + execFile.getName();
+
+				executeCommand(cwd, "cmd.exe", "/c", "start " + execFile.getName());
 			} else if (OSUtils.getOS().equals(OperatingSystem.OSX) || OSUtils.getOS().equals(OperatingSystem.LINUX)) {
-				command = "./" + execFile.getName();
+				executeCommand(cwd, "./" + execFile.getName());
 			} else {
 				throw new BuildException("Unknown Operating System.");
 			}
 
-			executeCommand(command, cwd);
 		}
 
 		execFile.delete();
@@ -66,12 +65,12 @@ public class GruntLauncher extends Task {
 		log("Grunt " + getGruntTask() + " ended in " + (System.currentTimeMillis() - time) + " ms");
 	}
 
-	private void executeCommand(String command, String cwd) {
+	private void executeCommand(String cwd, String... commands) {
 
 		Process p;
 		try {
-			ProcessBuilder pb = new ProcessBuilder(command);
-			Map<String, String> environment = pb.environment();
+			ProcessBuilder pb = new ProcessBuilder(commands);
+			// Map<String, String> environment = pb.environment();
 
 			pb.directory(new File(cwd));
 			pb.redirectErrorStream(true);
