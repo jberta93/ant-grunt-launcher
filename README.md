@@ -36,6 +36,22 @@ enviormentPath | no  | string | Paths to add Enviroment Path to allow the script
 executenpminstall | no  | boolean | If you want to execute npm install before grunt task
 executebowerinstall | no  | boolean | If you want to execute bower install before grunt task and after npm install if enabled
 
+## How to build
+
+1. Clone the repository
+2. The project has been developed using Eclipse
+3. Put as Source Folder the src directory
+4. Add to build path the jars contained in lib folder
+
+### Create jar
+
+To create a valid jar to test your modify you have to launch target ant called jar. 
+
+The new jar will be created in folder deploy.
+
+If you want to create a new release you need to change in build.xml the property project.release.version and execute target called jar-release
+
+
 # License
 
 This project is released over [MIT license](http://opensource.org/licenses/MIT "MIT License")
