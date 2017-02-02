@@ -11,7 +11,7 @@ The main goal of ant-grunt-launcher is to allow an easy integration between your
 
   ```xml 
   <path id="grunt.lib.path">
-      <pathelement path="build/lib/ant-grunt-launcher-0.0.1.jar" />
+      <pathelement path="build/lib/ant-grunt-launcher-0.0.2.jar" />
   </path>
   
   <taskdef name="grunt" classname="org.jberta93.gruntlauncher.core.GruntLauncher" classpathref="grunt.lib.path"/>
