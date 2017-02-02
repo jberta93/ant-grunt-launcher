@@ -134,6 +134,8 @@ public class BashFileManager {
 		sb.append(gruntTask);
 		sb.append(" \n");
 
+		sb.append("exit 0");
+
 		bw.write(sb.toString());
 		bw.flush();
 		bw.close();

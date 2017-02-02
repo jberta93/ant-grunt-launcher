@@ -33,7 +33,7 @@
 			<format property="TODAY" pattern="yyyyMMddHHmmss" />
 		</tstamp>
 	
-		<property name="project.release.version" value="0.0.1" />
+		<property name="project.release.version" value="0.0.2" />
 		<property name="project.status" value="release" />
 	
 		

@@ -51,7 +51,7 @@ public class GruntLauncher extends Task {
 		if (execFile != null) {
 			if (OSUtils.getOS().equals(OperatingSystem.WINDOWS)) {
 
-				executeCommand(cwd, "cmd.exe", "/c", "start " + execFile.getName());
+				executeCommand(cwd, "cmd.exe", "/c", execFile.getName());
 			} else if (OSUtils.getOS().equals(OperatingSystem.OSX) || OSUtils.getOS().equals(OperatingSystem.LINUX)) {
 				executeCommand(cwd, "./" + execFile.getName());
 			} else {
