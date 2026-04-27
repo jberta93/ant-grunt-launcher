@@ -1,7 +1,10 @@
 # ant-grunt-launcher
-Ant Task to call your Grunt Task
+Ant Task to run Grunt tasks or npm commands from an Ant build.
 
-The main goal of ant-grunt-launcher is to allow an easy integration between your Ant Build and [Grunt.js](http://gruntjs.com/)
+The main goal of ant-grunt-launcher is to allow an easy integration between your Ant Build and [Grunt.js](http://gruntjs.com/) or any npm script.
+## Latest release:
+
+The latest release is 1.0.0.
 
 ## How to use
 
@@ -16,11 +19,26 @@ The main goal of ant-grunt-launcher is to allow an easy integration between your
   
   <taskdef name="grunt" classname="org.jberta93.gruntlauncher.core.GruntLauncher" classpathref="grunt.lib.path"/>
   ```
-4.  In your target use the new task
+4. In your target use the new task
 
+  **Run a Grunt task:**
   ```xml 
   <target name="frontend-target" description="My FE target">
-    <grunt gruntfiledir="/frontend-stuff/src" grunttask="build" enviormentPath="/usr/local/bin" executenpminstall="false" executebowerinstall="false"/>
+    <grunt gruntfiledir="/frontend-stuff/src" grunttask="build" enviormentPath="/usr/local/bin"/>
+  </target>
+  ```
+
+  **Run an npm script (e.g. `npm run build-prod`):**
+  ```xml
+  <target name="frontend-target" description="My FE target">
+    <grunt gruntfiledir="/frontend-stuff/src" npmcommand="run build-prod" enviormentPath="/usr/local/bin" executenpminstall="true"/>
+  </target>
+  ```
+
+  **Run only npm install:**
+  ```xml
+  <target name="frontend-target" description="My FE target">
+    <grunt gruntfiledir="/frontend-stuff/src" executenpminstall="true"/>
   </target>
   ```
 
@@ -30,11 +48,12 @@ The main goal of ant-grunt-launcher is to allow an easy integration between your
 
 Attribute | Mandatory | Type | Description
 ----|----|----|----
-gruntfiledir | yes  | string | Directory where Gruntfile.js is located in your project
-grunttask | yes  | string | Task name registered in Gruntfile.js
-enviormentPath | no  | string | Paths to add Enviroment Path to allow the script to use grunt/node executable. For instance: /usr/local/bin for OSX or C:\Users\username\AppData\Roaming\npm for Microsoft Windows
-executenpminstall | no  | boolean | If you want to execute npm install before grunt task
-executebowerinstall | no  | boolean | If you want to execute bower install before grunt task and after npm install if enabled
+gruntfiledir | yes | string | Directory where Gruntfile.js (or package.json) is located in your project
+grunttask | no | string | Grunt task name registered in Gruntfile.js (default: `build`). Ignored if `npmcommand` is set
+npmcommand | no | string | npm command to run instead of grunt (e.g. `run build-prod`, `test`, `audit`). When set, grunt is not invoked
+enviormentPath | no | string | Paths to append to PATH so the script can find grunt/node executables. Example: `/usr/local/bin` on macOS/Linux, `C:\Users\username\AppData\Roaming\npm` on Windows
+executenpminstall | no | boolean | Run `npm install` before the main command
+executebowerinstall | no | boolean | Run `bower install` before the main command (after npm install if both are enabled)
 
 ## How to build
 

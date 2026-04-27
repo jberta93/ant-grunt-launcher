@@ -17,17 +17,18 @@ public class BashFileManager {
 	 * @param enviromentVariableToConcat enviroment variables to add in the PATH for grunt / node
 	 * @param executeNpmInstall if script must execute npm install command
 	 * @param executeBowerInstall if script must execute bower install command
+	 * @param npmCommand npm command to run instead of grunt (e.g. "run build-prod"), or null to run grunt
 	 * @return script to exec
 	 * @throws IOException
 	 */
 	public static File createShellScript(String dir, String gruntTask, String enviromentVariableToConcat, Boolean executeNpmInstall,
-			Boolean executeBowerInstall) throws IOException {
+			Boolean executeBowerInstall, String npmCommand) throws IOException {
 		String osName = System.getProperty("os.name").toLowerCase();
 		File execFile = null;
 		if (osName.indexOf("win") >= 0) {
-			execFile = createBatFile(dir, gruntTask, enviromentVariableToConcat, executeNpmInstall, executeBowerInstall);
+			execFile = createBatFile(dir, gruntTask, enviromentVariableToConcat, executeNpmInstall, executeBowerInstall, npmCommand);
 		} else {
-			execFile = createShFile(dir, gruntTask, enviromentVariableToConcat, executeNpmInstall, executeBowerInstall);
+			execFile = createShFile(dir, gruntTask, enviromentVariableToConcat, executeNpmInstall, executeBowerInstall, npmCommand);
 		}
 
 		return execFile;
@@ -45,7 +46,7 @@ public class BashFileManager {
 	 * @throws IOException
 	 */
 	private static File createShFile(String dir, String gruntTask, String enviromentVariableToConcat, Boolean executeNpmInstall,
-			Boolean executeBowerInstall) throws IOException {
+			Boolean executeBowerInstall, String npmCommand) throws IOException {
 
 		File f = new File(dir + "/" + FILENAME + ".sh");
 
@@ -53,7 +54,7 @@ public class BashFileManager {
 		BufferedWriter bw = new BufferedWriter(fw);
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("#/bin/bash \n");
+		sb.append("#!/bin/bash \n");
 
 		if (enviromentVariableToConcat != null) {
 			sb.append("export PATH=");
@@ -62,21 +63,22 @@ public class BashFileManager {
 		}
 
 		if (executeNpmInstall != null && executeNpmInstall) {
-
-			sb.append("echo \"npm install started\" \n");
 			sb.append("npm install \n");
-			sb.append("echo \"npm install ended\" \n");
 		}
 
 		if (executeBowerInstall != null && executeBowerInstall) {
-			sb.append("echo \"bower install started\" \n");
 			sb.append("bower install \n");
-			sb.append("echo \"bower install ended\" \n");
 		}
 
-		sb.append("grunt ");
-		sb.append(gruntTask);
-		sb.append(" \n");
+		if (npmCommand != null) {
+			sb.append("npm ");
+			sb.append(npmCommand);
+			sb.append(" \n");
+		} else if( gruntTask != null){
+			sb.append("grunt ");
+			sb.append(gruntTask);
+			sb.append(" \n");
+		}
 
 		bw.write(sb.toString());
 		bw.flush();
@@ -102,7 +104,7 @@ public class BashFileManager {
 	 */
 
 	private static File createBatFile(String dir, String gruntTask, String enviromentVariableToConcat, Boolean executeNpmInstall,
-			Boolean executeBowerInstall) throws IOException {
+			Boolean executeBowerInstall, String npmCommand) throws IOException {
 
 		File f = new File(dir + "/" + FILENAME + ".bat");
 
@@ -119,20 +121,22 @@ public class BashFileManager {
 		}
 
 		if (executeNpmInstall != null && executeNpmInstall) {
-			sb.append("echo \"npm install started\" \n");
 			sb.append("npm install \n");
-			sb.append("echo \"npm install ended\" \n");
 		}
 
 		if (executeBowerInstall != null && executeBowerInstall) {
-			sb.append("echo \"bower install started\" \n");
 			sb.append("bower install \n");
-			sb.append("echo \"bower install ended\" \n");
 		}
 
-		sb.append("grunt ");
-		sb.append(gruntTask);
-		sb.append(" \n");
+		if (npmCommand != null) {
+			sb.append("npm ");
+			sb.append(npmCommand);
+			sb.append(" \n");
+		} else if( gruntTask != null){
+			sb.append("grunt ");
+			sb.append(gruntTask);
+			sb.append(" \n");
+		}
 
 		sb.append("exit 0");
 

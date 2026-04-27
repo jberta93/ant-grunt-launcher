@@ -20,6 +20,8 @@ public class GruntLauncher extends Task {
 	private String enviormentPath = null;
 	private Boolean executeNpmInstall = null;
 	private Boolean executeBowerInstall = null;
+	private String npmCommand = null;
+
 
 	@Override
 	public void execute() {
@@ -28,44 +30,56 @@ public class GruntLauncher extends Task {
 		}
 		long time = System.currentTimeMillis();
 
-		log("Executing Grunt Task");
-		log("Gruntfile.js Directory: " + getGruntfileDir());
-		log("Grunt Task: " + getGruntTask());
-		log("Enviroment Variables to add to PATH: " + getEnviormentPath());
-		log("Execute NPM Install: " + (getExecuteNpmInstall() != null && getExecuteNpmInstall()));
-		log("Execute Bower Install: " + (getExecuteBowerInstall() != null && getExecuteBowerInstall()));
-
+		log("[GruntLauncher] Starting execution");
+		log("  Directory : " + getGruntfileDir());
+		if (getExecuteNpmInstall() != null && getExecuteNpmInstall()) {
+			log("  Step 1    : npm install");
+		}
+		if (getExecuteBowerInstall() != null && getExecuteBowerInstall()) {
+			log("  Step 2    : bower install");
+		}
+		if (getNpmCommand() != null) {
+			log("  Command   : npm " + getNpmCommand());
+		} else {
+			log("  Command   : grunt " + getGruntTask());
+		}
+		if (getEnviormentPath() != null) {
+			log("  PATH+     : " + getEnviormentPath());
+		}
 		log("-----------------------------");
-		String[] command;
-		String cwd = getGruntfileDir();
 
+		String cwd = getGruntfileDir();
 		File execFile = null;
 
 		try {
 			execFile = BashFileManager.createShellScript(getGruntfileDir(), getGruntTask(), getEnviormentPath(), getExecuteNpmInstall(),
-					getExecuteBowerInstall());
+					getExecuteBowerInstall(), getNpmCommand());
 		} catch (IOException e) {
-			throw new BuildException("No gruntfileDir set.");
+			throw new BuildException("Failed to create shell script: " + e.getMessage(), e);
 		}
 
 		if (execFile != null) {
+			int exitCode;
 			if (OSUtils.getOS().equals(OperatingSystem.WINDOWS)) {
-
-				executeCommand(cwd, "cmd.exe", "/c", execFile.getName());
+				exitCode = executeCommand(cwd, "cmd.exe", "/c", execFile.getName());
 			} else if (OSUtils.getOS().equals(OperatingSystem.OSX) || OSUtils.getOS().equals(OperatingSystem.LINUX)) {
-				executeCommand(cwd, "./" + execFile.getName());
+				exitCode = executeCommand(cwd, "./" + execFile.getName());
 			} else {
-				throw new BuildException("Unknown Operating System.");
+				throw new BuildException("Unknown operating system: " + OSUtils.getOS());
 			}
 
+			if (exitCode != 0) {
+				throw new BuildException("Task failed with exit code: " + exitCode);
+			}
 		}
 
 		execFile.delete();
 
-		log("Grunt " + getGruntTask() + " ended in " + (System.currentTimeMillis() - time) + " ms");
+		String operation = getNpmCommand() != null ? "npm " + getNpmCommand() : "grunt " + getGruntTask();
+		log("[GruntLauncher] " + operation + " completed in " + (System.currentTimeMillis() - time) + " ms");
 	}
 
-	private void executeCommand(String cwd, String... commands) {
+	private int executeCommand(String cwd, String... commands) {
 
 		Process p;
 		try {
@@ -81,7 +95,9 @@ public class GruntLauncher extends Task {
 			while ((line = reader.readLine()) != null) {
 				log(line);
 			}
-			p.waitFor();
+			int exitCode = p.waitFor();
+
+			return exitCode;
 
 		} catch (Exception e) {
 			throw new BuildException(e);
@@ -142,5 +158,13 @@ public class GruntLauncher extends Task {
 
 	public void setExecuteBowerInstall(Boolean executeBowerInstall) {
 		this.executeBowerInstall = executeBowerInstall;
+	}
+
+	public String getNpmCommand() {
+		return this.npmCommand;
+	}
+
+	public void setNpmCommand(String npmCommand) {
+		this.npmCommand = npmCommand;
 	}
 }
